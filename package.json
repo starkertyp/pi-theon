@@ -1,0 +1,15 @@
+{
+  "name": "pi-theon",
+  "version": "0.1.0",
+  "description": "Small parent-agent orchestration policy for Pi and pi-subagents",
+  "type": "module",
+  "keywords": ["pi-package"],
+  "files": ["agents/documenter.md", "extensions/theon.js", "instructions/orchestrator.md", "README.md"],
+  "scripts": {
+    "test": "node --test"
+  },
+  "pi": {
+    "extensions": ["./extensions/theon.js"],
+    "subagents": { "agents": ["./agents"] }
+  }
+}
