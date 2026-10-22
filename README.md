@@ -18,7 +18,7 @@ gegen **0.79.1**). pi-theon installiert pi-subagents nicht automatisch.
 pi install npm:pi-subagents
 
 # Lokaler Checkout; kein npm-Release erforderlich:
-pi install /home/elevader/projects/pi-theon
+pi install git:github.com/starkertyp/pi-theon
 pi
 ```
 
@@ -32,11 +32,6 @@ mit (`agents/documenter.md`, im Manifest als Paket-Agent unter
 Projektebene hat Vorrang vor der Paketversion.
 
 Bei bereits laufendem Pi `/reload` verwenden (oder Pi neu starten).
-Ohne Installation für einen Start ausprobieren:
-
-```sh
-pi -e /home/elevader/projects/pi-theon
-```
 
 ## Bedienung
 
