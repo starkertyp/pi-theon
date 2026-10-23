@@ -65,7 +65,10 @@ Verwendet werden die vorhandenen Rollen `scout`, `worker`, `reviewer`,
 Dokumentation schreibt (Doku-Inhalt, Indexe, Navigation; nie Quellcode, Tests
 oder Konfiguration). Nicht jeder Auftrag braucht alle Rollen oder ein
 Review. Ein Writer pro cwd/Worktree; native asynchrone Fertigmeldungen wecken
-den Hauptagenten ohne Polling. Der vollständige kurze Vertrag steht in
+den Hauptagenten ohne Polling. Vor abschließenden Erfolgsmeldungen nach einem
+Worker-/Reviewer-Lauf führt der Hauptagent eine beratende Reconciler-Prüfung
+durch (Klassifikator-Modell via Codemode); steht kein Klassifikator zur
+Verfügung, entfällt dieser Schritt stillschweigend. Der vollständige kurze Vertrag steht in
 [`instructions/orchestrator.md`](instructions/orchestrator.md).
 
 ### Modelle und Abhängigkeiten
