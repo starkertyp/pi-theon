@@ -66,9 +66,13 @@ Dokumentation schreibt (Doku-Inhalt, Indexe, Navigation; nie Quellcode, Tests
 oder Konfiguration). Nicht jeder Auftrag braucht alle Rollen oder ein
 Review. Ein Writer pro cwd/Worktree; native asynchrone Fertigmeldungen wecken
 den Hauptagenten ohne Polling. Vor abschließenden Erfolgsmeldungen nach einem
-Worker-/Reviewer-Lauf führt der Hauptagent eine beratende Reconciler-Prüfung
-durch (Klassifikator-Modell via Codemode); steht kein Klassifikator zur
-Verfügung, entfällt dieser Schritt stillschweigend. Der vollständige kurze Vertrag steht in
+Worker-/Reviewer-Lauf kann der Hauptagent eine beratende Reconciler-Prüfung
+über ein Klassifikator-Modell (via Codemode) ausführen. Sie ist
+standardmäßig **aus**, wird über `theon.classifier` aktiviert (siehe
+„Modelle und Abhängigkeiten“), nutzt exakt das dort konfigurierte Modell
+und wird bei Nichtverfügbarkeit oder Fehlschlag sichtbar übersprungen statt
+durch ein anderes Modell ersetzt. Der Abgleich mit realem Diff- und
+Validierungsnachweis bleibt in jedem Fall Pflicht. Der vollständige kurze Vertrag steht in
 [`instructions/orchestrator.md`](instructions/orchestrator.md).
 
 ### Modelle und Abhängigkeiten
@@ -76,8 +80,9 @@ Verfügung, entfällt dieser Schritt stillschweigend. Der vollständige kurze Ve
 Dein vorhandenes Pi-Modell (`/model`, Provider-Anmeldung, Thinking) und die
 pi-subagents-Konfiguration bleiben maßgeblich. Bei Bedarf Modelle dort über
 `subagents.defaultModel` bzw. `subagents.agentOverrides.<rolle>.model`
-konfigurieren, nicht in Theon. Theon setzt weder Modelle noch Tool-Listen
-oder Capability Ceilings. Web-Recherche benötigt die von pi-subagents
+konfigurieren, nicht in Theon. Theon setzt weder Chat- noch Subagent-Modelle und ändert keine
+Tool-Listen oder Capability Ceilings; `theon.classifier` benennt nur das
+beratende Klassifikator-Modell. Web-Recherche benötigt die von pi-subagents
 vorgesehenen Web-Tools im Kind (z. B. pi-web-access).
 
 Theon erkennt ein aktives `subagent` oder den Lazy-Loader `subagents_enable`.
@@ -87,6 +92,36 @@ und `/subagents-doctor` prüfen. Bis dahin sind Lesen und Planung möglich;
 keine vorgetäuschte Delegation und kein stiller CLI-Fallback. Für bewusste
 direkte Arbeit `/theon off` verwenden. Tool-Präsenz beweist noch keinen
 erfolgreichen Launch; Laufzeitfehler müssen gemeldet werden.
+
+#### Reconciler-Klassifikator: `theon.classifier`
+
+Die beratende Klassifikator-Prüfung ist standardmäßig **aus** und wird über
+normale Pi-Einstellungen aktiviert: global in `~/.pi/agent/settings.json`
+oder pro Projekt in `.pi/settings.json` (Projekt gewinnt; `false` im
+Projekt deaktiviert ein global konfiguriertes Objekt):
+
+```json
+"theon": {
+  "classifier": { "provider": "<provider>", "model": "<model-id>" }
+}
+```
+
+Fehlt der Schlüssel oder ist er `false`, bleibt die Prüfung aus. Jedes
+andere Format (auch `true`) erzeugt eine sichtbare Warnung mit der
+erwarteten Form; nur der Klassifikator bleibt aus, Theon läuft sonst
+normal weiter und Einstellungsdateien werden nie umgeschrieben. Theon
+liest den zusammengeführten Snapshot des Hosts bei jedem Agentenstart neu;
+wann Änderungen auf der Platte sichtbar werden, bestimmt Pi (Reload,
+Neustart) — Theon ergänzt kein Caching und keinen Hot-Reload.
+
+Aktiviert nutzt die Prüfung exakt dieses Modell — kein Ersatz, keine
+automatische Auswahl. Ist das Modell nicht verfügbar, schlägt der Aufruf
+fehl (`stopReason`/`errorMessage`) oder fehlt Codemode, überspringt der
+Hauptagent die Prüfung sichtbar mit Begründung, ohne die Phase abzubrechen
+oder die Konfiguration zu ändern, und versucht es bei der nächsten fälligen
+Prüfung erneut. Wie alle Theon-Regeln ist das Prompt-Policy, keine
+technische Garantie; die Abgleichung mit realem Diff- und
+Validierungsnachweis bleibt immer Pflicht.
 
 ## Grenzen und Kind-Sessions
 

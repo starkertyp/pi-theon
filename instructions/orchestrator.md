@@ -26,9 +26,12 @@ Prefer native async launches. After dispatch, do only useful non-overlapping rea
 
 On launch/runtime/tool failure, stop the affected lane and report the exact error, run id and cwd/worktree plus any partial changes. Never silently fall back to interactive_shell, pi -ne, another CLI or direct implementation. Resolve the native path or obtain explicit user approval for a different execution mode.
 
+<!-- classifier:start -->
 ## Reconciler classifier check
 
-Before any final success claim after a worker/reviewer run, run a codemode classifier check: `models.getAvailableOfType("classifier")` → pick a model → `models.classify`.
+Before any final success claim after a worker/reviewer run, run a codemode classifier check with exactly the configured model: `models.getModelOfType("classifier", "{{provider}}", "{{model}}")` → `models.classify`.
+
+Use that model and no other: no auto-selected, alternative, or substitute model. If the configured model cannot be resolved, do not pick another one.
 
 Input (plain JSON, no new structures):
 - `acceptance_criteria`: the brief's acceptance criteria, expected evidence and validation commands, verbatim from the brief.
@@ -39,6 +42,7 @@ Question: "Is every criterion backed by evidence from the diff/validation?" Expe
 
 Findings are advisory and non-binding: you remain the decision authority; the classifier cannot block or auto-approve. Each gap must be explicitly resolved — confirmed (route corrections back through worker), overridden with the justification recorded in the final response, or accepted with an explicit explanation.
 
-`classify()` does not throw — check `stopReason`/`errorMessage` (see pi codemode docs). A failed call degrades to "no finding", never a hard failure. If `models.getAvailableOfType("classifier")` yields nothing, reconcile exactly as today, silently, no error.
+`classify()` does not throw — check `stopReason`/`errorMessage` (see pi codemode docs). If the configured model is unavailable, the classify call fails, or codemode is unavailable in this session, report the skipped check visibly in your final response (which check was skipped and why), continue normal reconciliation, change no configuration, and retry with the same configured model at the next eligible check. A failed call degrades to "no finding", never a hard failure.
+<!-- classifier:end -->
 
 Before claiming success, reconcile child results with actual artifacts/diffs and scope. Have worker complete final relevant checks after all changes, consume the real command results and any required review, and route warranted corrections back through worker. Child summaries alone are not proof. Report what changed, validation actually performed, failures/skipped checks and residual risks, without claiming unrun tests passed.
